@@ -28,7 +28,7 @@ for ((i=1; i<=NUM_SUBDIRS; i++)); do
         echo "Stopped: <1GB free" | tee -a "$LOG_FILE"
         break
     fi
-    # create_folder_with_files echoes the path of the newly created folder
+    
     new_path=$(create_folder_with_files "$current_path" "$FOLDER_LETTERS" "$DATE_SUFFIX" \
         "$NUM_FILES" "$FILE_PATTERN" "$FILE_SIZE_KB" "$LOG_FILE")
     [ $? -ne 0 ] && break
