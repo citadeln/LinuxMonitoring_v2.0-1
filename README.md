@@ -255,3 +255,24 @@ The page itself can be refreshed within a bash script or a program (in a loop), 
 
 
 💡 [Tap here](https://forms.yandex.ru/cloud/641818e069387223cba1286e/) **to leave your feedback on the project**. Product Team really tries to make your educational experience better.
+
+```
+LinuxMonitoring_v2.0-1
+├─ README.md
+├─ README_RUS.md
+├─ materials
+│  ├─ Combined_Log_Format.md
+│  ├─ part06_sed.md
+│  ├─ part07_awk.md
+│  ├─ topics-list.md
+│  └─ topics-list_RUS.md
+└─ src
+   └─ 01
+      ├─ check_space.sh
+      ├─ create_structure.sh
+      ├─ generate_names.sh
+      ├─ log.sh
+      ├─ main.sh
+      └─ validate.sh
+
+```

@@ -16,6 +16,13 @@ validate_params() {
     fi
 
     if ! [[ "$6" =~ ^[0-9]+$ ]] || [ "$6" -gt 100 ] || [ "$6" -le 0 ]; then echo "size_kb: 1-100"; return 1; fi
-    mkdir -p "$BASE_PATH" 2>/dev/null || { echo "Invalid path"; return 1; }
+
+#    mkdir -p "$BASE_PATH" 2>/dev/null || { echo "Invalid path"; return 1; }
+
+    if [[ ! "$BASE_PATH" =~ ^/.*$ ]]; then 
+       echo "Path must be absolute (start with /)"
+       return 1
+    fi
+
     return 0
 }

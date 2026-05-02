@@ -19,6 +19,13 @@ FILE_SIZE_KB="$6"
 DATE_SUFFIX=$(date +%d%m%y)
 LOG_FILE="${BASE_PATH}/generation_${DATE_SUFFIX}.log"
 
+if [ ! -w "$(dirname "$BASE_PATH")" ]; then
+    echo "Error: No write permission in $(dirname "$BASE_PATH")"
+    exit 1
+fi
+
+mkdir -p "$BASE_PATH" || { echo "Cannot create $BASE_PATH (permission denied)"; exit 1; }
+
 init_log "$LOG_FILE"
 
 for ((level=1; level<=NUM_SUBDIRS; level++)); do
