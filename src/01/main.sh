@@ -3,35 +3,31 @@
 source ./validate.sh
 source ./check_space.sh
 source ./generate_names.sh
-source ./create_structure.sh
 source ./log.sh
-
-if ! validate_params "$@"; then
-    exit 1
-fi
 
 BASE_PATH="$1"
 NUM_SUBDIRS="$2"
 FOLDER_LETTERS="$3"
 NUM_FILES="$4"
 FILE_PATTERN="$5"
-FILE_SIZE_KB="$6"
+FILE_SIZE_KB="${6%kb*}"
 DATE_SUFFIX=$(date +%d%m%y)
 LOG_FILE="${BASE_PATH}/generation_${DATE_SUFFIX}.log"
 
-if [ ! -w "$(dirname "$BASE_PATH")" ]; then
-    echo "Error: No write permission in $(dirname "$BASE_PATH")"
+if ! validate_params "${@:1:5}" "$FILE_SIZE_KB"; then
     exit 1
 fi
 
-mkdir -p "$BASE_PATH" || { echo "Cannot create $BASE_PATH (permission denied)"; exit 1; }
-
+mkdir -p "$BASE_PATH" || { echo "Cannot create $BASE_PATH"; exit 1; }
 init_log "$LOG_FILE"
 
-for ((level=1; level<=NUM_SUBDIRS; level++)); do
-    if ! has_enough_space "/"; then
-        echo "Stopped: less than 1GB free on /" | tee -a "$LOG_FILE"
+# Цикл создаёт 4 ПАПКИ НА ОДНОМ УРОВНЕ
+for ((i=1; i<=NUM_SUBDIRS; i++)); do
+    if ! has_enough_space; then
+        echo "Stopped: <1GB free" | tee -a "$LOG_FILE"
         break
     fi
-    create_level "$BASE_PATH" $level "$FOLDER_LETTERS" "$DATE_SUFFIX" "$NUM_FILES" "$FILE_PATTERN" "$FILE_SIZE_KB" "$LOG_FILE"
+    create_folder_with_files "$BASE_PATH" "$FOLDER_LETTERS" "$DATE_SUFFIX" "$NUM_FILES" "$FILE_PATTERN" "$FILE_SIZE_KB"
+    
+"$LOG_FILE"
 done

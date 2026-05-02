@@ -1,36 +1,22 @@
 #!/bin/bash
 
-source ./check_space.sh
-source ./generate_names.sh
-
-create_level() {
-    local current_path="$1" 
-    local level="$2" 
-    local folder_letters="$3" 
-    local date_suf="$4" 
-    local num_files="$5" 
-    local file_pat="$6" 
-    local size_kb="$7" 
-    local log="$8"
+create_folder_with_files() {
+    local base_path="$1" folder_letters="$2" date_suf="$3" 
+    local num_files="$4" file_pat="$5" size_kb="$6" log_file="$7"
     
-    # Генерируем имя текущей папки
     local folder_name=$(generate_folder_name "$folder_letters" "$date_suf")
-    local new_path="${current_path}/${folder_name}"
+    local folder_path="${base_path}/${folder_name}"
     
-    mkdir -p "$new_path" || return 1
-    log_entry "$log" "Created folder: $new_path $(date)"
+    mkdir -p "$folder_path" && \
+    echo "✓ Created: $folder_path ($(date))" >> "$log_file" || \
+    { echo "✗ mkdir failed: $folder_path" >> "$log_file"; return 1; }
     
-    # Создаем файлы в текущей созданной папке
     for ((i=1; i<=num_files; i++)); do
-        if ! has_enough_space "/"; then return 1; fi
-        
         local fname=$(generate_file_name "${file_pat%.*}" "${file_pat#*.}" "$date_suf")
-        local fpath="${new_path}/${fname}"
+        local fpath="${folder_path}/${fname}"
         
-        dd if=/dev/urandom of="$fpath" bs=1K count="$size_kb" status=none 2>/dev/null
-        log_entry "$log" "Created file: $fpath $(date) $(stat -c%s "$fpath" 2>/dev/null || echo 'unknown')"
+        dd if=/dev/urandom of="$fpath" bs=1K count="$size_kb" status=none && \
+        echo "✓ File: $fpath ($(date)) size=$(stat -c%s "$fpath")" >> "$log_file" || \
+        echo "✗ File failed: $fpath" >> "$log_file"
     done
-
-    # РЕКУРСИЯ: если это не последний уровень, вызываем функцию для вложенной папки
-    # Здесь нужно добавить логику контроля глубины, если вы хотите ограничить вложенность
 }

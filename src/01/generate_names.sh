@@ -2,22 +2,22 @@
 
 generate_folder_name() {
     local letters="$1" date_suf="$2"
-    local base="$letters"  # az
-    while [ ${#base} -lt 4 ]; do base+="${letters:0:1}"; done  # aaaz
-    echo "${base}_${date_suf}"
+    local name="$letters"  # kl
+    while [ ${#name} -lt 4 ]; do name+="kl"; done
+    echo "${name}_${date_suf}"
 }
 
 generate_file_name() {
     local name_part="$1" ext_part="$2" date_suf="$3"
-    local name_len=$((RANDOM % 4 + 4))
-    local name_body=$(cat /dev/urandom | tr -dc "$name_part" | head -c "$name_len")
     
-    local ext_len=$((RANDOM % 3 + 1))
-    local ext_body=$(cat /dev/urandom | tr -dc "$ext_part" | head -c "$ext_len")
+    # Генерируем короткую часть имени (2-4 символа) из набора букв, сохраняя порядок набора
+    # Используем 'shuf' для перемешивания букв из набора и берем первые N
+    local name_len=$((RANDOM % 3 + 2)) # Длина 2-4
+    local name_body=$(echo "$name_part" | fold -w1 | shuf | tr -d '\n' | head -c "$name_len")
     
-    # Проверка для имени файла тоже
-    local used_name=$(echo "$name_body" | grep -o . | sort -u | tr -d '\n')
-    [[ "$used_name" != "$name_part" ]] && name_body=$(generate_folder_name "$name_part" "") && name_body="${name_body%_*}"
+    # Генерируем короткое расширение (1-2 символа)
+    local ext_len=$((RANDOM % 2 + 1))
+    local ext_body=$(echo "$ext_part" | fold -w1 | shuf | tr -d '\n' | head -c "$ext_len")
     
     echo "${name_body}_${date_suf}.${ext_body}"
 }
