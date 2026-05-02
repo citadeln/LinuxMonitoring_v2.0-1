@@ -25,17 +25,15 @@ validate_params() {
     local size_num
 
     if [[ "$raw_size" =~ ^[0-9]+[kK][bB]$ ]]; then
-        # Если это число + kb (в любом регистре), извлекаем число
         size_num="${raw_size%[kK][bB]*}"
     elif [[ "$raw_size" =~ ^[0-9]+$ ]]; then
-        # Если это просто число
         size_num="$raw_size"
     else
         echo "size_kb: must be a number or number followed by 'kb' (e.g., 10 or 10kb)"
         return 1
     fi
 
-    # Проверяем диапазон для числа (общая часть для обоих случаев)
+    # Проверяем диапазон числа
     if [ "$size_num" -gt 100 ] || [ "$size_num" -le 0 ]; then
         echo "size_kb: value must be between 1 and 100"
         return 1
