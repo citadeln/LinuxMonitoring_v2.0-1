@@ -7,6 +7,7 @@ source ./check_space.sh
 source ./generate_names.sh
 source ./log.sh
 source ./create_structure.sh
+source ./generate_nums.sh
 
 BASE_PATH=pwd
 
@@ -48,4 +49,4 @@ fi
 RUNTIME=$(($difference/1000))
 echo -e "Start time: $START_TIME \n 
         End time: $END_TIME \n
-        Script execution time (in seconds) = 0.$RUNTIME"
+        Script execution time (in seconds) = 0.$RUNTIME" | tee -a "$LOG_FILE"
