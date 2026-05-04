@@ -40,13 +40,20 @@ for ((i=1; i<=NUM_SUBDIRS; i++)); do
 done
 
 
+# END_TIME=$(date +%s)
+
+# if ! [[ $(($END_TIME-$START_TIME)) -gt 0 ]]; then difference=$((($END_TIME-$START_TIME)*(-1)))
+# else difference=$(($END_TIME-$START_TIME))
+# fi
+
+# RUNTIME=$(($difference/1000))
+# echo -e "Start time: $START_TIME \n 
+#         End time: $END_TIME \n
+#         Script execution time (in seconds) = 0.$RUNTIME" | tee -a "$LOG_FILE"
+
 END_TIME=$(date +%s)
-
-if ! [[ $(($END_TIME-$START_TIME)) -gt 0 ]]; then difference=$((($END_TIME-$START_TIME)*(-1)))
-else difference=$(($END_TIME-$START_TIME))
-fi
-
-RUNTIME=$(($difference/1000))
-echo -e "Start time: $START_TIME \n 
-        End time: $END_TIME \n
-        Script execution time (in seconds) = 0.$RUNTIME" | tee -a "$LOG_FILE"
+RUNTIME=$((END_TIME - START_TIME))
+echo "=== SUMMARY ===" | tee -a "$LOG_FILE"
+echo "Start: $(date -d "@$START_TIME")" | tee -a "$LOG_FILE"
+echo "End: $(date -d "@$END_TIME")" | tee -a "$LOG_FILE"
+echo "Runtime: ${RUNTIME}s (created $created_count folders)" | tee -a "$LOG_FILE"
