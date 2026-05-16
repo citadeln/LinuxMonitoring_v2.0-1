@@ -1,23 +1,40 @@
 #!/bin/bash
 
 _build_name() {
-    local letters="$1" min_len=5  # ≥5 для Part 2
+    local letters="$1" min_len=5 max_len=10
+
     local n=${#letters}
-    local target=$((n > min_len ? n + RANDOM%6 : min_len + RANDOM%6))
-    
-    local reps=($(printf '1 %.0s' {1..$((target-n))} | xargs -n$n))
+    local lo=$((min_len > n ? min_len : n))
+    local target=$((lo + RANDOM % (max_len - lo + 1)))
+
+    local -a reps
+    for ((i=0; i<n; i++)); do
+        reps[i]=1
+    done
+    for ((r=n; r<target; r++)); do
+        local pos=$((RANDOM % n))
+        reps[pos]=$((${reps[pos]} + 1))
+    done
+
     local name=""
     for ((i=0; i<n; i++)); do
-        name+=$(printf '%*s' "${reps[i]}" "" | tr ' ' "${letters:i:1}")
+        local c="${letters:$i:1}"
+        for ((j=0; j<${reps[i]}; j++)); do
+            name="${name}${c}"
+        done
     done
-    echo "${name:0:10}"  # ≤10 символов
+
+    echo "$name"
 }
 
 generate_folder_name() {
-    echo "$(_build_name "$1")_${2}"
+    local letters="$1" date_suf="$2"
+    echo "$(_build_name "$letters")_${date_suf}"
 }
 
 generate_file_name() {
     local name_part="$1" ext_part="$2" date_suf="$3"
-    echo "$(_build_name "$name_part")_${date_suf}.$(_build_name "$ext_part")"
+    local name_body="$(_build_name "$name_part")"
+    local ext_body="$(_build_name "$ext_part")"
+    echo "${name_body}_${date_suf}.${ext_body}"
 }
