@@ -2,14 +2,16 @@
 
 START_TIME=$(date +%s)
 
-source ./validate.sh
-source ./check_space.sh
-source ./generate_names.sh
-source ./log.sh
-source ./create_structure.sh
-source ./generate_nums.sh
+# абсолютный путь к директории текущего скрипта
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# pwd → base path, если в нём bin/sbin — запрещён
+source "$SCRIPT_DIR/validate.sh"
+source "$SCRIPT_DIR/check_space.sh"
+source "$SCRIPT_DIR/generate_names.sh"
+source "$SCRIPT_DIR/log.sh"
+source "$SCRIPT_DIR/create_structure.sh"
+source "$SCRIPT_DIR/generate_nums.sh"
+
 BASE_PATH=$(pwd)
 
 if [[ "$BASE_PATH" =~ (bin|sbin) ]]; then
