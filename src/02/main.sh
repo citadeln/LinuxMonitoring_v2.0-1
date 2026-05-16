@@ -53,7 +53,7 @@ for ((level=1; level<=NUM_DIR_LEVELS; level++)); do
                                       "$FILE_PATTERN" "$FILE_SIZE_MB" \
                                       "$LOG_FILE")
 
-    if [ $? -ne 0 ]; then
+    if [ $? -ne 0 ]; then   # status code is not equal "success"
         echo "create_single_folder failed at level $level" >> "$LOG_FILE"
         break
     fi

@@ -7,18 +7,18 @@ _build_name() {
     local lo=$((min_len > n ? min_len : n))
     local target=$((lo + RANDOM % (max_len - lo + 1)))
 
-    local -a reps
+    local -a reps   # repetitions
     for ((i=0; i<n; i++)); do
         reps[i]=1
     done
-    for ((r=n; r<target; r++)); do
+    for ((r=n; r<target; r++)); do # r - extra character counter
         local pos=$((RANDOM % n))
         reps[pos]=$((${reps[pos]} + 1))
     done
 
     local name=""
     for ((i=0; i<n; i++)); do
-        local c="${letters:$i:1}"
+        local c="${letters:$i:1}" # ${letters:${start_index}:${length}}
         for ((j=0; j<${reps[i]}; j++)); do
             name="${name}${c}"
         done
