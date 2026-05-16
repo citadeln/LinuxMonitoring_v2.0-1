@@ -14,7 +14,12 @@ validate_params() {
     
     IFS='.' read -ra FP <<< "$file_pattern"
     if [ ${#FP[@]} -ne 2 ] || [ ${#FP[0]} -gt 7 ] || [ ${#FP[1]} -gt 3 ]; then
-        echo "file_pattern: name.ext (az.az)"; return 1
+        echo "Error: Invalid file pattern."
+        echo "Format must be: <name>.<extension>"
+        echo "  - Name: 1 to 7 characters."
+        echo "  - Extension: 1 to 3 characters."
+        echo "Example: data.log or file.txt";
+        return 1
     fi
     
     local size_num="${raw_size%[mM][bB]*}"
