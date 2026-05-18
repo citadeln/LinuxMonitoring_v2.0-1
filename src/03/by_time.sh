@@ -1,33 +1,35 @@
 #!/bin/bash
 
-find_time_epoch() {
-    local dt_str="$1"
-    # convert "2026-05-18 12:00" -> seconds since epoch
-    date -d "$dt_str" +%s 2>/dev/null || { echo "Invalid date string: $dt_str"; exit 1; }
-}
+cleanup_by_time() {
+    local base_dir="$1"
+    local start_str end_str start_epoch end_epoch
 
-START_EPOCH=$(find_time_epoch "$START_STR")
-END_EPOCH=$(find_time_epoch "$END_STR")
+    echo "Time format: YYYY-MM-DD HH:MM"
+    read -r -p "Enter start time: " start_str
+    read -r -p "Enter end time: " end_str
 
-if [ "$START_EPOCH" -gt "$END_EPOCH" ]; then
-    echo "Start time must be earlier than or equal to end time"
-    exit 1
-fi
+    if ! validate_time_input "$start_str" || ! validate_time_input "$end_str"; then
+        echo "Error: invalid time format."
+        return 1
+    fi
 
-find_files_by_time_in_current_dir() {
-    local base_dir
-    base_dir=$(pwd)
+    start_epoch=$(date -d "$start_str" +%s)
+    end_epoch=$(date -d "$end_str" +%s)
 
-    # walk through all files under pwd (including subdirs)
+    if [ "$start_epoch" -gt "$end_epoch" ]; then
+        echo "Error: start time must be earlier than end time."
+        return 1
+    fi
+
     while IFS= read -r -d '' file; do
-        if [ ! -f "$file" ]; then continue; fi
-        mtime=$(stat -c %Y "$file" 2>/dev/null) || continue
-
-        if [ "$mtime" -ge "$START_EPOCH" ] && [ "$mtime" -le "$END_EPOCH" ]; then
-            echo "[by_time] rm -f '$file' (mtime in [$START_STR, $END_STR])"
-            rm -f "$file"
+        local birth_epoch
+        birth_epoch=$(stat -c %W "$file" 2>/dev/null)
+        if [ -z "$birth_epoch" ] || [ "$birth_epoch" -le 0 ]; then
+            birth_epoch=$(stat -c %Y "$file" 2>/dev/null)
         fi
-    done < <(find "$base_dir" -type f -print0 2>/dev/null)
-}
 
-find_files_by_time_in_current_dir
+        if [ "$birth_epoch" -ge "$start_epoch" ] && [ "$birth_epoch" -le "$end_epoch" ]; then
+            rm -rf "$file"
+        fi
+    done < <(find "$base_dir" -depth -print0)
+}

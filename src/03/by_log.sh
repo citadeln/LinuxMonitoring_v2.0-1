@@ -1,39 +1,30 @@
 #!/bin/bash
 
-prompt_log_file() {
-    echo -n "Enter path to log file: "
-    read -r LOG_PATH
-    if [ ! -f "$LOG_PATH" ]; then
-        echo "Error: log file does not exist: $LOG_PATH"
-        exit 1
+cleanup_by_log() {
+    local base_dir="$1"
+    local log_file
+
+    read -r -p "Enter log file name: " log_file
+
+    if [ ! -f "$base_dir/$log_file" ]; then
+        echo "Error: log file not found in current directory."
+        return 1
     fi
+
+    local folder_path
+    folder_path=$(awk -F'Created folder: ' '/^Created folder: / {print $2; exit}' "$base_dir/$log_file" | awk '{
+        sub(/ \(.*/, "", $0);
+        print
+    }')
+
+    if [ -z "$folder_path" ]; then
+        echo "Error: no folder entries found in log."
+        return 1
+    fi
+
+    if [ ! -e "$folder_path" ]; then
+        return 0
+    fi
+
+    rm -rf "$folder_path"
 }
-
-find_files_in_log_relative() {
-    local log="$1"
-    # ищем строки вида:
-    # Created file: /path/to/..._DDMMYY.*
-    # ограничиваемся только файлами внутри pwd
-    local base_dir
-    base_dir=$(pwd)
-
-    grep -F "Created file:" "$log" | \
-        awk '{print $3}' | \
-        while read -r file; do
-            if [ -n "$file" ]; then
-                # нормализуем путь
-                abs_file=$(readlink -f "$file" 2>/dev/null || echo "$file")
-                abs_dir=$(dirname "$abs_file")
-
-                # если base_dir == pwd, тогда удаляем
-                if [ "$abs_dir" = "$base_dir" ] || \
-                   [[ "$abs_dir" =~ ^"$base_dir"/ ]]; then
-                    echo "[by_log] rm -f '$file'"
-                    rm -f "$file"
-                fi
-            fi
-        done
-}
-
-prompt_log_file
-find_files_in_log_relative "$LOG_PATH"
