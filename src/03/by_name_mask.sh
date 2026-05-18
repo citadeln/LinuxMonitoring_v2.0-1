@@ -42,7 +42,7 @@ cleanup_by_name_mask() {
     letters="${BASH_REMATCH[1]}"
     date_part="${BASH_REMATCH[2]}"
 
-    # 3) Удаляем все папки, соответствующие маске (сначала папки!)
+    # 3) Удаляем все папки, соответствующие маске
     echo "Searching for folders matching mask..."
     while IFS= read -r -d '' folder; do
         local name="$(basename -- "$folder")"
@@ -52,17 +52,7 @@ cleanup_by_name_mask() {
         fi
     done < <(find "$base_dir" -type d -name "*_*" -print0)
 
-    # 4) Удаляем все файлы, соответствующие маске (если они не в уже удаленных папках)
-    echo "Searching for files matching mask..."
-    while IFS= read -r -d '' file; do
-        local name="$(basename -- "$file")"
-        if match_name_mask "$name" "$letters" "$date_part"; then
-            echo "Removing file: $file"
-            rm -f -- "$file"
-        fi
-    done < <(find "$base_dir" -type f ! -name "*_*" -print0)
-
-    # 5) Удаляем лог-файл, соответствующий этой дате
+    # 4) Удаляем лог-файл, соответствующий этой дате
     local log_file_to_delete="${base_dir}/generation_part2_${date_part}.log"
     if [ -f "$log_file_to_delete" ]; then
         echo "Removing log file: $log_file_to_delete"
