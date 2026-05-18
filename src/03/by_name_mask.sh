@@ -5,24 +5,53 @@ match_name_mask() {
     local letters="$2"
     local date_part="$3"
 
-    # Проверяем формат: буквы_дата
-    [[ "$name" =~ ^([a-z]+)_([0-9]{6})$ ]] || return 1
+    # 1. Проверяем общий формат: только буквы, затем подчеркивание, затем дата
+    if ! [[ "$name" =~ ^([a-z]+)_([0-9]{6})$ ]]; then
+        return 1
+    fi
 
     local name_letters="${BASH_REMATCH[1]}"
     local name_date="${BASH_REMATCH[2]}"
 
-    # Проверяем совпадение даты
-    [ "$name_date" = "$date_part" ] || return 1
+    # 2. Проверяем совпадение даты
+    if [ "$name_date" != "$date_part" ]; then
+        return 1
+    fi
 
-    # Проверяем порядок букв из маски в имени (каждая буква маски должна встречаться в имени по порядку)
-    local i j=0 c
-    for ((i=0; i<${#letters}; i++)); do
-        c="${letters:i:1}"
-        while [ "$j" -lt "${#name_letters}" ] && [ "${name_letters:j:1}" != "$c" ]; do ((j++)); done
-        [ "$j" -lt "${#name_letters}" ] || return 1
+    # 3. Проверка 1: Все буквы в имени должны быть из набора букв маски.
+    # Если в имени найдется буква, которой нет в маске -> маска не подходит.
+    for (( i=0; i<${#name_letters}; i++ )); do
+        local char="${name_letters:$i:1}"
+        # Проверяем, есть ли символ $char в строке $letters
+        if ! [[ "$letters" == *"$char"* ]]; then
+            return 1
+        fi
+    done
+
+    # 4. Проверка 2: Все буквы из маски должны быть в имени (проверка покрытия).
+    # Если в маске найдется буква, которой нет в имени -> маска не подходит.
+    for (( i=0; i<${#letters}; i++ )); do
+        local char="${letters:$i:1}"
+        if ! [[ "$name_letters" == *"$char"* ]]; then
+            return 1
+        fi
+    done
+
+    # 5. Проверка 3: Порядок букв из маски должен сохраняться в имени.
+    # (Ваша старая логика, она остается)
+    local i j=0
+    for (( i=0; i<${#letters}; i++ )); do
+        local c="${letters:$i:1}"
+        while [ "$j" -lt "${#name_letters}" ] && [ "${name_letters:$j:1}" != "$c" ]; do
+            ((j++))
+        done
+        if [ "$j" -ge "${#name_letters}" ]; then
+            return 1
+        fi
         ((j++))
     done
 
+    # Если все проверки пройдены, маска подходит.
     return 0
 }
 
