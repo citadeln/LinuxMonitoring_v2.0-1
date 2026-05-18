@@ -5,19 +5,20 @@ match_name_mask() {
     local letters="$2"
     local date_part="$3"
 
+    # Проверяем формат: буквы_дата
     [[ "$name" =~ ^([a-z]+)_([0-9]{6})$ ]] || return 1
 
     local name_letters="${BASH_REMATCH[1]}"
     local name_date="${BASH_REMATCH[2]}"
 
+    # Проверяем совпадение даты
     [ "$name_date" = "$date_part" ] || return 1
 
+    # Проверяем порядок букв из маски в имени (каждая буква маски должна встречаться в имени по порядку)
     local i j=0 c
     for ((i=0; i<${#letters}; i++)); do
         c="${letters:i:1}"
-        while [ "$j" -lt "${#name_letters}" ] && [ "${name_letters:j:1}" != "$c" ]; do
-            ((j++))
-        done
+        while [ "$j" -lt "${#name_letters}" ] && [ "${name_letters:j:1}" != "$c" ]; do ((j++)); done
         [ "$j" -lt "${#name_letters}" ] || return 1
         ((j++))
     done
@@ -29,8 +30,10 @@ cleanup_by_name_mask() {
     local base_dir="$1"
     local mask letters date_part
 
+    # 1) Запрашиваем маску у пользователя
     read -r -p "Enter mask (example: az_180526): " mask
 
+    # 2) Валидируем формат маски (буквы_дата)
     if ! [[ "$mask" =~ ^([a-z]{1,7})_([0-9]{6})$ ]]; then
         echo "Error: mask must be letters(1-7)_date(DDMMYY)."
         return 1
@@ -39,12 +42,32 @@ cleanup_by_name_mask() {
     letters="${BASH_REMATCH[1]}"
     date_part="${BASH_REMATCH[2]}"
 
-    while IFS= read -r -d '' path; do
-        local name
-        name="$(basename "$path")"
-
+    # 3) Удаляем все папки, соответствующие маске (сначала папки!)
+    echo "Searching for folders matching mask..."
+    while IFS= read -r -d '' folder; do
+        local name="$(basename -- "$folder")"
         if match_name_mask "$name" "$letters" "$date_part"; then
-            rm -rf "$path"
+            echo "Removing folder: $folder"
+            rm -rf -- "$folder"
         fi
-    done < <(find "$base_dir" -depth -print0)
+    done < <(find "$base_dir" -type d -name "*_*" -print0)
+
+    # 4) Удаляем все файлы, соответствующие маске (если они не в уже удаленных папках)
+    echo "Searching for files matching mask..."
+    while IFS= read -r -d '' file; do
+        local name="$(basename -- "$file")"
+        if match_name_mask "$name" "$letters" "$date_part"; then
+            echo "Removing file: $file"
+            rm -f -- "$file"
+        fi
+    done < <(find "$base_dir" -type f ! -name "*_*" -print0)
+
+    # 5) Удаляем лог-файл, соответствующий этой дате
+    local log_file_to_delete="${base_dir}/generation_part2_${date_part}.log"
+    if [ -f "$log_file_to_delete" ]; then
+        echo "Removing log file: $log_file_to_delete"
+        rm -f -- "$log_file_to_delete"
+    else
+        echo "Log file $log_file_to_delete not found."
+    fi
 }

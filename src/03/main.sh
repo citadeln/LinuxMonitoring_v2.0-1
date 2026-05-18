@@ -2,10 +2,8 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(pwd)"
-
 source "$SCRIPT_DIR/validate.sh"
 
-echo "=== Part 3 cleanup menu ==="
 echo "Choose cleanup method:"
 echo "1) By log file"
 echo "2) By creation time"
@@ -19,16 +17,9 @@ if ! validate_mode "$MODE"; then
 fi
 
 case "$MODE" in
-    1)
-        source "$SCRIPT_DIR/by_log.sh"
-        cleanup_by_log "$BASE_DIR"
-        ;;
-    2)
-        source "$SCRIPT_DIR/by_time.sh"
-        cleanup_by_time "$BASE_DIR"
-        ;;
-    3)
-        source "$SCRIPT_DIR/by_name_mask.sh"
-        cleanup_by_name_mask "$BASE_DIR"
-        ;;
+    1) source "$SCRIPT_DIR/by_log.sh"; cleanup_by_log "$BASE_DIR" ;;
+    2) source "$SCRIPT_DIR/by_time.sh"; cleanup_by_time "$BASE_DIR" ;;
+    3) source "$SCRIPT_DIR/by_name_mask.sh"; cleanup_by_name_mask "$BASE_DIR" ;;
 esac
+
+echo "=== Cleanup have done ==="
