@@ -42,15 +42,26 @@ cleanup_by_name_mask() {
     letters="${BASH_REMATCH[1]}"
     date_part="${BASH_REMATCH[2]}"
 
-    # 3) Удаляем все папки, соответствующие маске
-    echo "Searching for folders matching mask..."
+    # 3) Ищем ТОЛЬКО ПЕРВЫЙ каталог, СООТВЕТСТВУЮЩИЙ МАСКЕ, в текущей директории (не рекурсивно)
+    # -maxdepth 1 - чтобы искать только в pwd, а не во вложенных папках
+    # -type d - ищем только каталоги
+    # -name "*_*" - фильтруем имена с подчеркиванием для оптимизации
+    local found_folder=
     while IFS= read -r -d '' folder; do
         local name="$(basename -- "$folder")"
         if match_name_mask "$name" "$letters" "$date_part"; then
-            echo "Removing folder: $folder"
-            rm -rf -- "$folder"
+            found_folder="$folder"
+            break # Нашли первую подходящую папку, выходим из цикла
         fi
-    done < <(find "$base_dir" -type d -name "*_*" -print0)
+    done < <(find "$base_dir" -maxdepth 1 -type d -name "*_*" -print0)
+
+    if [ -n "$found_folder" ] && [ -d "$found_folder" ]; then
+        echo "Found matching folder: $found_folder"
+        echo "Removing folder and all its contents..."
+        rm -rf -- "$found_folder"
+    else
+        echo "No matching folders found in current directory."
+    fi
 
     # 4) Удаляем лог-файл, соответствующий этой дате
     local log_file_to_delete="${base_dir}/generation_part2_${date_part}.log"
