@@ -60,7 +60,6 @@ generate_logs() {
         log_date=$(date -d "-$day_offset day" +%F)
         file_name="$base_path/nginx_access_${log_date}.log"
         entries=$(rand_int 100 1000)
-        : > "$file_name"
 
         start_epoch=$(date -d "$log_date 00:00:00" +%s)
 
