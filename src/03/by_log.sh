@@ -23,18 +23,8 @@ cleanup_by_log() {
         fi
     done < <(awk -F': ' '/^Created folder: / {print $2}' "$base_dir/$log_file")
 
-    while IFS= read -r file_path; do
-        file_path=${file_path%% (*}
-        file_name="${file_path##*/}"
-
-        if [ -f "$base_dir/$file_name" ]; then
-            rm -f -- "$base_dir/$file_name"
-            found_any=1
-        fi
-    done < <(awk -F': ' '/^Created file: / {print $2}' "$base_dir/$log_file")
-
     if [ "$found_any" -eq 0 ]; then
-        echo "No folders or files to remove found in the log."
+        echo "No folders to remove found in the log."
     fi
 
     if [ -f "$base_dir/$log_file" ]; then
