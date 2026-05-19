@@ -2,6 +2,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$(pwd)"
+
 source "$SCRIPT_DIR/validate.sh"
 
 echo "Choose cleanup method:"
