@@ -31,6 +31,8 @@ rand_ip() {
 
 rand_from_array() {
     local -n arr="$1"
+
+    # ${#arr[@]} — возвращает общее количество элементов в массиве.
     echo "${arr[$((RANDOM % ${#arr[@]}))]}"
 }
 
@@ -64,7 +66,9 @@ generate_logs() {
 
     for day_offset in 0 1 2 3 4; do
         local log_date file_name entries start_epoch i offset ts dt ip method status url agent bytes
-        log_date=$(date -d "-$day_offset day" +%F)
+
+        # %F — это готовый стандартный шаблон (ISO 8601), который расшифровывается как %Y-%m-%d
+        log_date=$(date -d "-$day_offset day" +%F)    
         file_name="$base_path/nginx_access_${log_date}.log"
         entries=$(rand_int 100 1000)
 
