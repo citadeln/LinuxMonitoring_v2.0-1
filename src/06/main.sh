@@ -51,4 +51,5 @@ xdg-open file://$REPORT_HTML
 # goaccess nginx_access_*.log --log-format=COMBINED --real-time-html -o report.html
 
 # --daemonize запускает GoAccess как демон
-# goaccess nginx_access_*.log --log-format=COMBINED --real-time-html -o report.html --daemonize
+# goaccess $PWD/nginx_access_*.log --log-format=COMBINED --real-time-html -o $PWD/report.html --daemonize
+# pkill goaccess
